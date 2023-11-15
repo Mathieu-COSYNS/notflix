@@ -1,33 +1,33 @@
-<h1 align="center">NOTFLIX</h1>
-<p align="center">f@#k netflix use notflix a tool which search magnet links and stream it with peerflix</p>
+# NOTFLIX
 
-##
-<p align="center">
-<img src="./preview.gif" alt="Video Preview" width="500px">
-</p>
+notflix a tool which search magnet links and stream it with [btplay](https://github.com/johang/btfs).
 
-### How does this work?
+![Video Preview](./preview.gif)
+
+## How does this work?
 
 This is a shell script. It scrapes 1337x and gets the magnet link.
-After this it uses [peerflix](https://github.com/mafintosh/peerflix) to stream the video from magnet link.
+After this it uses [btplay](https://github.com/johang/btfs) to stream the video from magnet link.
 For scraping, the script uses simple gnu utils like sed, awk, paste, cut.
 
 ## Requirements
 
-* [peerflix](https://github.com/mafintosh/peerflix) - A tool to stream torrent. `sudo npm install peerflix -g`
+- [btfs](https://github.com/johang/btfs) - A tool to access torrent files as a filesystem.
+- My fork of [dmenu](https://github.com/Mathieu-COSYNS/dmenu)
+- A video player [compatible with btplay](https://github.com/johang/btfs/blob/80ee126c934eb167f35d0029d6a7dcc287f64d87/scripts/btplay#L34) or you should specify your video play inside the notflix.sh script
 
-## Installation
+## Install, Update or Remove
 
-### cURL
-cURL **notflix** to your **$PATH** and give execute permissions.
+### Favorite Method
 
-```sh
-$ sudo curl -sL "https://raw.githubusercontent.com/Bugswriter/notflix/master/notflix" -o /usr/local/bin/notflix
-$ sudo chmod +x /usr/local/bin/notflix
-```
-- To update, just do `curl` again, no need to `chmod` anymore.
-- To uninstall, simply remove `notflix` from your **$PATH**, for example `sudo rm -f /usr/local/bin/notflix.
+- To install, clone **notflix** repository then run `sudo ./install.sh`
+- To update, just do `git pull` then run `sudo ./install.sh` again.
+- To uninstall, run `sudo ./uninstall.sh` then remove your clone of the repo.
+
+### Alternative Method
+
+Download the file `notflix.sh` and do your thing. It's just a shell script written for linux.
 
 ## License
-This project is licensed under [GPL-3.0](https://raw.githubusercontent.com/Illumina/licenses/master/gpl-3.0.txt).
 
+This project is licensed under [GPL-3.0](https://raw.githubusercontent.com/Illumina/licenses/master/gpl-3.0.txt).

@@ -1,23 +1,22 @@
 #!/bin/sh
 
 # Dependencies:
-#   - peerflix
-#   - mpv
+#   - btfs (btplay)
 #   - https://github.com/Mathieu-COSYNS/dmenu
 
 menu="dmenu -i -l 20"
-baseurl="https://1337x.wtf"
+baseurl="https://1337x.to"
+BTPLAY_FLAGS=""
 
 cachedir="$HOME/.cache/notflix"
 searchhtmlfile="$cachedir/search.html"
-detailshtmlfile="$cachedir/details.html"
 titlefile="$cachedir/titles.txt"
 seedleechfile="$cachedir/seedleech.txt"
 sizesfile="$cachedir/sizes.txt"
 linksfile="$cachedir/links.txt"
 
 read_query() {
-  QUERY=`$menu -p "Search Torrent: " -it "$QUERY" <&-`
+  QUERY=$($menu -p "Search Torrent: " -it "$QUERY" <&-)
 
   # Canceled
   test -z "$QUERY" && return 1
@@ -29,14 +28,14 @@ read_query() {
 
 get_torrents_list() {
   # Download search results
-  curl -s "$baseurl/search/$(echo $QUERY | sed 's/ /+/g')/1/" > "$searchhtmlfile"
+  curl -s "$baseurl/search/$(echo $QUERY | sed 's/ /+/g')/1/" >"$searchhtmlfile"
 
   # Get Titles
   grep -o '<a href="/torrent/.*</a>' "$searchhtmlfile" |
     sed 's/<[^>]*>//g' |
     sed 's/\./ /g; s/\-/ /g' |
     sed 's/[^A-Za-z0-9 ]//g' |
-    tr -s " " > "$titlefile"
+    tr -s " " >"$titlefile"
 
   result_count=$(wc -l "$titlefile" | awk '{print $1}')
   if [ "$result_count" -lt 1 ]; then
@@ -48,24 +47,22 @@ get_torrents_list() {
   grep -o '<td class="coll-2 seeds.*</td>\|<td class="coll-3 leeches.*</td>' "$searchhtmlfile" |
     sed 's/<[^>]*>//g' |
     sed 'N;s/\n/ /' |
-    awk '{print "[S:"$1 ", L:"$2"]" }' > "$seedleechfile"
+    awk '{print "[S:"$1 ", L:"$2"]" }' >"$seedleechfile"
 
   # Size
   grep -o '<td class="coll-4 size.*</td>' "$searchhtmlfile" |
     sed 's/<span class="seeds">.*<\/span>//g' |
-    sed -e 's/<[^>]*>//g' > "$sizesfile"
+    sed -e 's/<[^>]*>//g' >"$sizesfile"
 
   # Links
-  grep -Eo "/torrent\/[0-9]{7}\/[a-zA-Z0-9?%-]*/" "$searchhtmlfile" > "$linksfile"
+  grep -Eo "/torrent\/[0-9]{7}\/[a-zA-Z0-9?%-]*/" "$searchhtmlfile" >"$linksfile"
 
   return 0
 }
 
 select_torrent_url() {
   # Getting the line number
-  LINE=$(expr "$(paste -d '@' "$sizesfile" "$seedleechfile" "$titlefile" |
-    sed 's/@/ - /g' |
-    $menu -r -ix)")
+  LINE="$(paste -d '@' "$sizesfile" "$seedleechfile" "$titlefile" | sed 's/@/ - /g' | $menu -r -ix)"
 
   if [ -z "$LINE" ]; then
     return 1
@@ -91,19 +88,13 @@ open_magnet_link() {
 
   notify-send "🧲 Magnet found! Loading..."
 
-  PEERFLIX_FLAGS="-l --mpv -- --fs"
-
-  if [ -t 0 ]; then
-    peerflix "$magnet" $PEERFLIX_FLAGS
-  else
-    x-terminal-emulator -T Notflix -e bash -i -c "peerflix \"$magnet\" $PEERFLIX_FLAGS"
-  fi
+  btplay $BTPLAY_FLAGS "$magnet"
 
   return 0
 }
 
 # Read args
-QUERY="$@"
+QUERY=$*
 
 mkdir -p "$cachedir"
 
